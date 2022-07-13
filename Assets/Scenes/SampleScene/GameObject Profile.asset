@@ -1,5 +1,44 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3159204311797987912
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba8cf1d5ca8f19c4aa70af555baafabb, type: 3}
+  m_Name: RadiusBlurEffect
+  m_EditorClassIdentifier: 
+  active: 1
+  m_AdvancedMode: 0
+  BlurRange:
+    m_OverrideState: 1
+    m_Value: 0
+    min: 0
+    max: 0.6
+  SampleCount:
+    m_OverrideState: 1
+    m_Value: 9
+    min: 4
+    max: 16
+  BlurCenterX:
+    m_OverrideState: 1
+    m_Value: 0.5
+    min: 0
+    max: 1
+  BlurCenterY:
+    m_OverrideState: 1
+    m_Value: 0.5
+    min: 0
+    max: 1
+  BlurPower:
+    m_OverrideState: 1
+    m_Value: 10
+    min: 0
+    max: 10
 --- !u!114 &-1750166856725970455
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -21,7 +60,7 @@ MonoBehaviour:
     max: 1
   OverlayColor:
     m_OverrideState: 1
-    m_Value: {r: 0.8867924, g: 0.62393, b: 0.55633676, a: 1}
+    m_Value: {r: 0.9811321, g: 0.7509585, b: 0.17123532, a: 1}
     hdr: 0
     showAlpha: 1
     showEyeDropper: 1
@@ -37,19 +76,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c280214f4f9402a9da3d6555b29b6f5, type: 3}
   m_Name: BoxBlurEffect
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   m_AdvancedMode: 0
   BlurSize:
     m_OverrideState: 1
     m_Value: 0
     min: 0
     max: 20
-  BlurColor:
-    m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
-    hdr: 0
-    showAlpha: 1
-    showEyeDropper: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,8 +98,9 @@ MonoBehaviour:
   components:
   - {fileID: -1750166856725970455}
   - {fileID: -1670465264304347211}
-  - {fileID: 5059462525015266539}
---- !u!114 &5059462525015266539
+  - {fileID: -3159204311797987912}
+  - {fileID: 6738802230290664888}
+--- !u!114 &6738802230290664888
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,32 +109,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba8cf1d5ca8f19c4aa70af555baafabb, type: 3}
-  m_Name: RadiusBlurEffect
+  m_Script: {fileID: 11500000, guid: 66f335fb1ffd8684294ad653bf1c7564, type: 3}
+  m_Name: ColorAdjustments
   m_EditorClassIdentifier: 
   active: 1
   m_AdvancedMode: 0
-  BlurRange:
-    m_OverrideState: 1
+  postExposure:
+    m_OverrideState: 0
     m_Value: 0
-    min: 0
-    max: 0.6
-  BlurColor:
+  contrast:
+    m_OverrideState: 0
+    m_Value: 0
+    min: -100
+    max: 100
+  colorFilter:
     m_OverrideState: 1
     m_Value: {r: 1, g: 1, b: 1, a: 1}
-    hdr: 0
-    showAlpha: 1
+    hdr: 1
+    showAlpha: 0
     showEyeDropper: 1
-  SampleCount:
-    m_OverrideState: 1
-    m_Value: 16
-    min: 4
-    max: 16
-  BlurCenter:
-    m_OverrideState: 1
-    m_Value: {x: 0.5, y: 0.5}
-  BlurPower:
-    m_OverrideState: 1
-    m_Value: 6
-    min: 0
-    max: 6
+  hueShift:
+    m_OverrideState: 0
+    m_Value: 0
+    min: -180
+    max: 180
+  saturation:
+    m_OverrideState: 0
+    m_Value: 0
+    min: -100
+    max: 100

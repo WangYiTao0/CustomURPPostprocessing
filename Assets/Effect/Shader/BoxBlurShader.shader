@@ -28,7 +28,7 @@
         float4 _MainTex_ST;
 
 		float _BlurSize;
-		float4 _BlurColor;
+		//float4 _BlurColor;
 
 		v2f vert(a2v i)
         {

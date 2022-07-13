@@ -6,13 +6,13 @@ namespace Effect
 {
     public class CustomPostProcessPass : ScriptableRenderPass
     {
-        RenderTargetIdentifier source;
-        RenderTargetIdentifier destinationA;
-        RenderTargetIdentifier destinationB;
-        RenderTargetIdentifier latestDest;
+        RenderTargetIdentifier _source;
+        RenderTargetIdentifier _destinationA;
+        RenderTargetIdentifier _destinationB;
+        RenderTargetIdentifier _latestDest;
         
-        readonly int temporaryRTIdA = Shader.PropertyToID("_TempRT");
-        readonly int temporaryRTIdB = Shader.PropertyToID("_TempRTB");
+        readonly int _temporaryRTIdA = Shader.PropertyToID("_TempRTA");
+        readonly int _temporaryRTIdB = Shader.PropertyToID("_TempRTB");
         
         public CustomPostProcessPass(RenderPassEvent settingsWhenToInsert)
         {
@@ -22,18 +22,19 @@ namespace Effect
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            //Grab the camera target descriptor. We will use this when creating a temporary render texture.
+            //Grab the camera target descriptor.
+            //We will use this when creating a temporary render texture.
             RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
             descriptor.depthBufferBits = 0;
             
             var renderer = renderingData.cameraData.renderer;
-            source = renderer.cameraColorTarget;
+            _source = renderer.cameraColorTarget;
             
             // Create a temporary render texture using the descriptor from above.
-            cmd.GetTemporaryRT(temporaryRTIdA , descriptor, FilterMode.Bilinear);
-            destinationA = new RenderTargetIdentifier(temporaryRTIdA);
-            cmd.GetTemporaryRT(temporaryRTIdB , descriptor, FilterMode.Bilinear);
-            destinationB = new RenderTargetIdentifier(temporaryRTIdB);
+            cmd.GetTemporaryRT(_temporaryRTIdA , descriptor, FilterMode.Bilinear);
+            _destinationA = new RenderTargetIdentifier(_temporaryRTIdA);
+            cmd.GetTemporaryRT(_temporaryRTIdB , descriptor, FilterMode.Bilinear);
+            _destinationB = new RenderTargetIdentifier(_temporaryRTIdB);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -43,7 +44,6 @@ namespace Effect
                 return;
             
             // Here you get your materials from your custom class
-            // (It's up to you! But here is how I did it)
             var materials = CustomPostProcessingMaterials.Instance;
             if (materials == null)
             {
@@ -62,46 +62,42 @@ namespace Effect
             // we can have multiple passes and similar with only a few textures
             void BlitTo(Material mat, int pass = 0)
             {
-                var first = latestDest;
-                var last = first == destinationA ? destinationB : destinationA;
+                var first = _latestDest;
+                var last = first == _destinationA ? _destinationB : _destinationA;
                 Blit(cmd, first, last, mat, pass);
 
-                latestDest = last;
+                _latestDest = last;
             }
             #endregion
             // Starts with the camera source
-            latestDest = source;
-
+            _latestDest = _source;
+            
+            //---Custom effect here---
+            #region CustomEffect
+            
             #region OverlayEffect
    
-            //---Custom effect here---
             var OverlayEffect = stack.GetComponent<OverlayEffect>();
             // Only process if the effect is active
             if (OverlayEffect.IsActive())
             {
                 var material = materials.OverlayEffect;
-                // P.s. optimize by caching the property ID somewhere else
-                material.SetFloat(Shader.PropertyToID("_Intensity"), OverlayEffect.Intensity.value);
-                material.SetColor(Shader.PropertyToID("_OverlayColor"), OverlayEffect.OverlayColor.value);
+                material.SetFloat(ShaderString.Overlay_IntensityID, OverlayEffect.Intensity.value);
+                material.SetColor(ShaderString.Overlay_OverlayColorID, OverlayEffect.OverlayColor.value);
             
                 BlitTo(material);
             } 
 
             #endregion
             
-            // Add any other custom effect/component you want, in your preferred order
-            // Custom effect 2, 3 , ...
-            
             #region BoxBlurEffect
 
             var boxBlurEffect = stack.GetComponent<BoxBlurEffect>();
-            // Only process if the effect is active
+            
             if (boxBlurEffect.IsActive())
             {
                 var material = materials.BoxBlurEffect;
-                // P.s. optimize by caching the property ID somewhere else
-                material.SetFloat(Shader.PropertyToID("_BlurSize"), boxBlurEffect.BlurSize.value);
-                material.SetColor(Shader.PropertyToID("_BlurColor"), boxBlurEffect.BlurColor.value);
+                material.SetFloat(ShaderString.BoxBlur_BlurSizeID, boxBlurEffect.BlurSize.value);
             
                 BlitTo(material);
             } 
@@ -110,28 +106,28 @@ namespace Effect
 
             #region RadiusBlurEffect
 
-            
             var radiusBlurEffect = stack.GetComponent<RadiusBlurEffect>();
             // Only process if the effect is active
             if (radiusBlurEffect.IsActive())
             {
                 var material = materials.RadiusBlurEffect;
                 // P.s. optimize by caching the property ID somewhere else
-                material.SetFloat(Shader.PropertyToID("_BlurRange"), radiusBlurEffect.BlurRange.value);
-                material.SetColor(Shader.PropertyToID("_BlurColor"), radiusBlurEffect.BlurColor.value);
-                material.SetVector(Shader.PropertyToID("_BlurCenter"), radiusBlurEffect.BlurCenter.value);
-                material.SetInt(Shader.PropertyToID("_SampleCount"), radiusBlurEffect.SampleCount.value);
-                material.SetFloat(Shader.PropertyToID("_BlurPower"), radiusBlurEffect.BlurPower.value);
+                material.SetFloat(ShaderString.RadiusBlur_BlurRangeID, radiusBlurEffect.BlurRange.value);
+                material.SetVector(ShaderString.RadiusBlur_BlurCenterID, radiusBlurEffect.BlurCenter);
+                material.SetInt(ShaderString.RadiusBlur_SampleCountID, radiusBlurEffect.SampleCount.value);
+                material.SetFloat(ShaderString.RadiusBlur_BlurPowerID, radiusBlurEffect.BlurPower.value);
                 BlitTo(material);
             } 
 
             #endregion
  
             
-  
+              
+
+            #endregion
             
             // DONE! Now that we have processed all our custom effects, applies the final result to camera
-            Blit(cmd, latestDest, source);
+            Blit(cmd, _latestDest, _source);
             
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -171,8 +167,8 @@ namespace Effect
         
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(temporaryRTIdA);
-            cmd.ReleaseTemporaryRT(temporaryRTIdB);
+            cmd.ReleaseTemporaryRT(_temporaryRTIdA);
+            cmd.ReleaseTemporaryRT(_temporaryRTIdB);
         }
     }
 }

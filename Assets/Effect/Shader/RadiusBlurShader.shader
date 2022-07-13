@@ -33,7 +33,7 @@
 		int _SampleCount;
 		float _BlurRange;
 		float _BlurPower;
-		float4 _BlurColor;
+		//float4 _BlurColor;
 		ENDHLSL
 		
 		Pass
@@ -51,7 +51,6 @@
 
 			half4 frag(v2f i) : SV_TARGET
 			{
-				//float2 res = _MainTex_TexelSize.xy;
 				float2 dir =  i.uv - _BlurCenter;
 				float2 dir_normal = normalize(dir) * _BlurRange;
 				float4 col;
@@ -65,8 +64,9 @@
 				}
 				col /= _SampleCount;
 				float d = length(dir);
-				col = lerp(SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv),col,saturate(_BlurPower * d * d));
-				return col ;
+				col = lerp(SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv),col
+					,saturate(_BlurPower * d * d));
+				return col;
 			}
 			ENDHLSL
 		}
